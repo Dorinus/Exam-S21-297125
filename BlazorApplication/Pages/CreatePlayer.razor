@@ -1,0 +1,67 @@
+@page "/CreatePlayer"
+@using WebApplication.Models
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager NavigationManager
+@inject ITeamManager TeamManager
+@inject IPlayerManager PlayerManager
+
+<h3>Create Player</h3>
+
+
+<select @bind="teamName">
+    @if (Teams != null)
+    {
+
+        @foreach (var team in Teams)
+        {
+            <option value="@team.TeamName">@team.TeamName<text>. </text> @team.NameOfCoach </option>
+        }
+    
+    }
+</select>
+
+
+<EditForm Model="@NewPlayer" OnValidSubmit="@CreateNewPlayer">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group"> Name:<br/> <InputText rows="4" @bind-Value="NewPlayer.Name"/> </div>
+    <div class="form-group"> Position:<br/> <InputText rows="4" @bind-Value="NewPlayer.Position"/> </div>
+    <div class="form-group"> Salary:<br/> <InputNumber rows="4" @bind-Value="NewPlayer.Salary"/> </div>
+    <div class="form-group"> Goals This Season:<br/> <InputNumber rows="4" @bind-Value="NewPlayer.GoalsThisSeason"/> </div>
+    <p class="actions">
+        <button class="btn btn-outline-dark" type="submit">Create Player</button>
+    </p>
+</EditForm>
+
+
+@code {
+    IList<Team> Teams = new List<Team>();
+    Player NewPlayer = new Player();
+    String teamName;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // sending such arguments to get all teams
+        Teams = await TeamManager.GetTeams(-1, null);
+
+    }
+
+
+    private async void CreateNewPlayer()
+    {
+        try
+        {
+            bool response = await PlayerManager.AddPlayer(NewPlayer, teamName);
+            if (response)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+
+}

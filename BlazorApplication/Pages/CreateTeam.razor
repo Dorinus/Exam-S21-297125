@@ -1,0 +1,40 @@
+@page "/CreateTeam"
+@using WebApplication.Models
+@inject NavigationManager NavigationManager
+@inject ITeamManager TeamManager
+
+<h3>CreateTeam</h3>
+
+
+<EditForm Model="@newTeam" OnValidSubmit="@CreateNewTeam">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group"> Team Name:<br/> <InputText rows="4" @bind-Value="newTeam.TeamName"/> </div>
+    <div class="form-group"> Name Of Coach:<br/> <InputText rows="4" @bind-Value="newTeam.NameOfCoach"/> </div>
+    <div class="form-group"> Ranking:<br/> <InputNumber rows="4" @bind-Value="newTeam.Ranking"/> </div>
+    <p class="actions">
+        <button class="btn btn-outline-dark" type="submit">Create Team</button>
+    </p>
+</EditForm>
+
+@code {
+    private Team newTeam = new Team();
+
+    private async void CreateNewTeam()
+    {
+        try
+        {
+            var response = await TeamManager.CreateTeam(newTeam);
+            if (response)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+}

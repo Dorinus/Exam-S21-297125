@@ -1,0 +1,97 @@
+@page "/TeamsPlayers"
+@using WebApplication.Models
+@using System.Collections
+@inject NavigationManager NavigationManager
+@inject ITeamManager TeamManager
+@inject IPlayerManager PlayerManager
+
+<h3>Teams and Players</h3>
+
+
+@if (Teams == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else if (!Teams.Any())
+{
+    <p>
+        <em>No teams exist in the system. Or something went wrong</em>
+    </p>
+}
+else
+{
+    <p> Show ranking below: <input type="number" @oninput="@((arg) => FilterRank(arg))" style="width:50px"/></p>
+    <p> Name: <input type="number" @oninput="@((arg) => FilterName(arg))" style="width:50px"/></p>
+
+
+    @foreach (var team in  Teams)
+    {
+        foreach (var player in team.Players)
+        {
+            <text>@team.TeamName, coached by @team.NameOfCoach, ranking: @team.Ranking </text>
+            <br>
+            <text>Players:</text>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th> <th>Shirt Number</th> <th>Salary</th>
+                    <th>Goals this season</th> <th>Position</th><th>Remove</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>@player.Name</td> <td>@player.ShirtNumber</td> <td>@player.Salary</td> <td>@player.GoalsThisSeason</td>
+                    <td>@player.Position</td>
+                    <td>
+                        <button @onclick="@(() => RemovePlayer(player.ShirtNumber, team.TeamName))">
+                            <i class="oi oi-trash" style="color:red"/>
+                        </button>
+                    </td>
+
+                </tr>
+
+
+                }
+                </tbody>
+            </table>
+        }
+    }
+@code {
+    private IList<Team> Teams = new List<Team>();
+
+    protected override async Task OnInitializedAsync()
+    {
+    //get all teams
+        Teams = await TeamManager.GetTeams(-1, null);
+    }
+
+    private async void RemovePlayer(int playerShirtNumber, string teamTeamName)
+    {
+        try
+        {
+            bool response = await PlayerManager.RemovePlayer(playerShirtNumber, teamTeamName);
+            if (response)
+            {
+                Teams = await TeamManager.GetTeams(-1, null);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    private void FilterName(ChangeEventArgs changeEventArgs)
+    {
+        
+    }
+
+
+    private void FilterRank(ChangeEventArgs changeEventArgs)
+    {
+       
+    }
+
+}
+}
